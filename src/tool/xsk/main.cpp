@@ -14,12 +14,13 @@
 #include "s4/xsk/s4.hpp"
 #include "h1/xsk/h1.hpp"
 #include "h2/xsk/h2.hpp"
+#include "experimental/t6/xsk/t6.hpp"
 
 namespace xsk::gsc
 {
 
 enum class mode { __, ASM, DISASM, COMP, DECOMP };
-enum class game { __, IW5, IW6, IW7, IW8, S1, S2, S4, H1, H2 };
+enum class game { __, IW5, IW6, IW7, IW8, S1, S2, S4, H1, H2, T6 };
 
 std::map<std::string, mode> modes = 
 { 
@@ -40,6 +41,7 @@ std::map<std::string, game> games =
     { "-s4", game::S4 },
     { "-h1", game::H1 },
     { "-h2", game::H2 },
+    { "-t6", game::T6 },
 };
 
 auto overwrite_prompt(const std::string& file) -> bool
@@ -345,6 +347,44 @@ void decompile_file(gsc::disassembler& disassembler, gsc::decompiler& decompiler
     }
 }
 
+namespace arc
+{
+
+void disassemble_file(arc::disassembler& disassembler, std::string file)
+{
+    try
+    {
+        bool client = false;
+        const auto ext = std::string(".gsc");
+        const auto extpos = file.find(ext);
+        const auto ext2 = std::string(".csc");
+        const auto extpos2 = file.find(ext);
+        
+        if (extpos != std::string::npos)
+        {
+            file.replace(extpos, ext.length(), "");
+        }
+        else if(extpos2 != std::string::npos)
+        {
+            client = true;
+            file.replace(extpos2, ext2.length(), "");
+        }
+
+        auto data = utils::file::read(file + (client ? ext2 : ext));
+
+        disassembler.disassemble(file, data);
+
+        utils::file::save(file + ".gscasm", disassembler.output_raw());
+        std::cout << "disassembled " << file << ".gscasm\n";
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+} // namespace xsk::gsc::arc
+
 int parse_flags(int argc, char** argv, game& game, mode& mode, bool& zonetool)
 {
     if (argc != 4) return 1;
@@ -389,7 +429,7 @@ int parse_flags(int argc, char** argv, game& game, mode& mode, bool& zonetool)
 void print_usage()
 {
     std::cout << "usage: gsc-tool.exe <game> <mode> <file>\n";
-    std::cout << "	* games: -iw5, -iw6, -iw7, -iw8, -s1, -s2, -s4, -h1, -h2\n";
+    std::cout << "	* games: -iw5, -iw6, -iw7, -iw8, -s1, -s2, -s4, -h1, -h2, -t6\n";
     std::cout << "	* modes: -asm, -disasm, -comp, -decomp\n";
 }
 
@@ -453,6 +493,10 @@ std::uint32_t main(std::uint32_t argc, char** argv)
             h2::assembler assembler;
             assemble_file(assembler, file, zonetool);
         }
+        else if (game == game::T6)
+        {
+
+        }
     }
     else if (mode == mode::DISASM)
     {
@@ -500,6 +544,11 @@ std::uint32_t main(std::uint32_t argc, char** argv)
         {
             h2::disassembler disassembler;
             disassemble_file(disassembler, file, game, zonetool);
+        }
+        else if (game == game::T6)
+        {
+            t6::disassembler disassembler;
+            arc::disassemble_file(disassembler, file);
         }
     }
     else if (mode == mode::COMP)
@@ -558,6 +607,10 @@ std::uint32_t main(std::uint32_t argc, char** argv)
             h2::compiler compiler;
             compile_file(assembler, compiler, file ,zonetool);
         }
+        else if (game == game::T6)
+        {
+            
+        }
     }
     else if (mode == mode::DECOMP)
     {
@@ -614,6 +667,10 @@ std::uint32_t main(std::uint32_t argc, char** argv)
             h2::disassembler disassembler;
             h2::decompiler decompiler;
             decompile_file(disassembler, decompiler, file, game, zonetool);
+        }
+        else if (game == game::T6)
+        {
+            
         }
     }
 

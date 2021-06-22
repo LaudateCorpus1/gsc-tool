@@ -14,10 +14,11 @@ A utility to compile & decompile IW engine game scripts.
 - **S4** *(Call of Duty: Vanguard)*
 - **H1** *(Call of Duty: Modern Warfare Remastered)*
 - **H2** *(Call of Duty: Modern Warfare 2 Campaign Remastered)*
+- **T6** *(Call of Duty: Black Ops 2)*
 ## Usage
 ``./gsc-tool.exe <game> <mode> <file>``
 
-**game**: `-iw5`, `-iw6`, `-iw7`, `-iw8`, `-s1`, `-s2`, `-s4`, `-h1`, `-h2`
+**game**: `-iw5`, `-iw6`, `-iw7`, `-iw8`, `-s1`, `-s2`, `-s4`, `-h1`, `-h2`, `-t6`
 | Mode     |Description                | Output      |
 |:---------|:--------------------------|:------------|
 |`-asm`    |assemble a `file.gscasm`   |`file.gscbin`|
